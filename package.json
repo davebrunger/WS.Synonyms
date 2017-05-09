@@ -1,0 +1,25 @@
+{
+  "name": "synonym-test",
+  "version": "1.0.0",
+  "description": "Simple Synonym Tester",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Brunger",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^15.0.24",
+    "@types/react-dom": "^15.5.0",
+    "bootstrap": "^3.3.7",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "awesome-typescript-loader": "^3.1.3",
+    "source-map-loader": "^0.2.1",
+    "typescript": "^2.3.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davebrunger/WS.Synonyms.git"
+  }
+}

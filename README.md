@@ -1,2 +1,2 @@
 # WS.Synonyms
-Simple online synonym tester
+Simple Synonym Tester
