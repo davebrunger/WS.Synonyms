@@ -1,11 +1,13 @@
 import * as React from "react";
 
 import { Welcome } from "./welcome/welcome";
-import { Question } from "./test/question";
+import { Test } from "./test/test";
 import { Result } from "./result/result";
+import { IScore } from "./test/score"
 
 export class AppState {
     questionNumber?: number;
+    score?: IScore;
 }
 
 export class App extends React.Component<{}, AppState>
@@ -21,14 +23,32 @@ export class App extends React.Component<{}, AppState>
 
         this.beginTest = this.beginTest.bind(this);
         this.nextQuestion = this.nextQuestion.bind(this);
+        this.updateScore = this.updateScore.bind(this);
     }
 
     beginTest() {
-        this.setState({ questionNumber: 1 });
+        this.setState({
+            questionNumber: 1,
+            score: null
+        });
+    }
+
+    updateScore(correct: boolean) {
+        var score = this.state.score || {
+            correctAnswers: 0,
+            questionsAnswered: 0
+        }
+        score.correctAnswers = score.correctAnswers + (correct ? 1 : 0);
+        score.questionsAnswered = score.questionsAnswered + 1;
+        this.setState({
+            score: score
+        });
     }
 
     nextQuestion() {
-        this.setState({ questionNumber: this.state.questionNumber + 1 });
+        this.setState({
+            questionNumber: this.state.questionNumber + 1,
+        });
     }
 
     render() {
@@ -38,11 +58,11 @@ export class App extends React.Component<{}, AppState>
             );
         } else if (this.state.questionNumber > this.numberOfQuestions) {
             return (
-                <Result restartTest={this.beginTest} totalQuestions={this.numberOfQuestions}/>
+                <Result restartTest={this.beginTest} score={this.state.score} />
             );
         } else {
             return (
-                <Question questionNumber={this.state.questionNumber} nextQuestion={this.nextQuestion}/>
+                <Test questionNumber={this.state.questionNumber} nextQuestion={this.nextQuestion} score={this.state.score} updateScore={this.updateScore} />
             );
         }
     }
