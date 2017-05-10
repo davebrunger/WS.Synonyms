@@ -6,10 +6,11 @@ import { Answer } from "./answer";
 import { IScore } from "./score";
 
 export interface TestProps {
+    numberOfQuestions: number;
     questionNumber: number;
     nextQuestion(): void;
     score: IScore;
-    updateScore(correct : boolean) : void;
+    updateScore(correct: boolean): void;
 }
 
 export interface TestState {
@@ -107,7 +108,7 @@ export class Test extends React.Component<TestProps, TestState>{
 
         return (
             <div>
-                <h3>Question {this.props.questionNumber}</h3>
+                <h3>Question {this.props.questionNumber} of {this.props.numberOfQuestions}</h3>
                 <p>Click or tap the word that is a synonym of {this.state.word}</p>
                 {questionOrResult}
             </div>

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -90,9 +90,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var welcome_1 = __webpack_require__(8);
-var test_1 = __webpack_require__(6);
-var result_1 = __webpack_require__(3);
+var welcome_1 = __webpack_require__(9);
+var test_1 = __webpack_require__(7);
+var result_1 = __webpack_require__(4);
 var AppState = (function () {
     function AppState() {
     }
@@ -103,16 +103,24 @@ var App = (function (_super) {
     __extends(App, _super);
     function App(props) {
         var _this = _super.call(this, props) || this;
-        _this.numberOfQuestions = 5;
         _this.state = {
             questionNumber: 0
         };
         _this.beginTest = _this.beginTest.bind(_this);
+        _this.restartTest = _this.restartTest.bind(_this);
         _this.nextQuestion = _this.nextQuestion.bind(_this);
         _this.updateScore = _this.updateScore.bind(_this);
         return _this;
     }
-    App.prototype.beginTest = function () {
+    App.prototype.beginTest = function (name, numberOfQuestions) {
+        this.setState({
+            questionNumber: 1,
+            score: null,
+            numberOfQuestions: numberOfQuestions,
+            name: name
+        });
+    };
+    App.prototype.restartTest = function () {
         this.setState({
             questionNumber: 1,
             score: null
@@ -138,11 +146,11 @@ var App = (function (_super) {
         if (this.state.questionNumber < 1) {
             return (React.createElement(welcome_1.Welcome, { beginTest: this.beginTest }));
         }
-        else if (this.state.questionNumber > this.numberOfQuestions) {
-            return (React.createElement(result_1.Result, { restartTest: this.beginTest, score: this.state.score }));
+        else if (this.state.questionNumber > this.state.numberOfQuestions) {
+            return (React.createElement(result_1.Result, { name: this.state.name, restartTest: this.restartTest, score: this.state.score }));
         }
         else {
-            return (React.createElement(test_1.Test, { questionNumber: this.state.questionNumber, nextQuestion: this.nextQuestion, score: this.state.score, updateScore: this.updateScore }));
+            return (React.createElement(test_1.Test, { numberOfQuestions: this.state.numberOfQuestions, questionNumber: this.state.questionNumber, nextQuestion: this.nextQuestion, score: this.state.score, updateScore: this.updateScore }));
         }
     };
     return App;
@@ -174,6 +182,48 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
+var FormGroup = (function (_super) {
+    __extends(FormGroup, _super);
+    function FormGroup() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    FormGroup.prototype.render = function () {
+        var divClass = "form-group";
+        if (this.props.validationClass) {
+            divClass = divClass + " " + this.props.validationClass;
+        }
+        var helpBlock = this.props.helpText
+            ? React.createElement("span", { className: "help-block" }, this.props.helpText)
+            : null;
+        return (React.createElement("div", { className: divClass },
+            React.createElement("label", { htmlFor: this.props.for, className: "col-sm-2 control-label" }, this.props.label),
+            React.createElement("div", { className: "col-sm-10" },
+                this.props.children,
+                helpBlock)));
+    };
+    return FormGroup;
+}(React.Component));
+exports.FormGroup = FormGroup;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(0);
 var Result = (function (_super) {
     __extends(Result, _super);
     function Result(props) {
@@ -188,7 +238,8 @@ var Result = (function (_super) {
         return (React.createElement("div", null,
             React.createElement("h3", null, "Results"),
             React.createElement("p", null,
-                "You answered ",
+                this.props.name,
+                ", you answered ",
                 this.props.score.correctAnswers,
                 " of ",
                 this.props.score.questionsAnswered,
@@ -201,7 +252,7 @@ exports.Result = Result;
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -273,7 +324,7 @@ exports.Answer = Answer;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -332,7 +383,7 @@ exports.Question = Question;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -349,9 +400,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var words_1 = __webpack_require__(7);
-var question_1 = __webpack_require__(5);
-var answer_1 = __webpack_require__(4);
+var words_1 = __webpack_require__(8);
+var question_1 = __webpack_require__(6);
+var answer_1 = __webpack_require__(5);
 var Test = (function (_super) {
     __extends(Test, _super);
     function Test(props) {
@@ -421,7 +472,9 @@ var Test = (function (_super) {
         return (React.createElement("div", null,
             React.createElement("h3", null,
                 "Question ",
-                this.props.questionNumber),
+                this.props.questionNumber,
+                " of ",
+                this.props.numberOfQuestions),
             React.createElement("p", null,
                 "Click or tap the word that is a synonym of ",
                 this.state.word),
@@ -433,7 +486,7 @@ exports.Test = Test;
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1041,7 +1094,7 @@ exports.Words = Words;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1058,20 +1111,56 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
+var formGroup_1 = __webpack_require__(3);
 var Welcome = (function (_super) {
     __extends(Welcome, _super);
     function Welcome(props) {
         var _this = _super.call(this, props) || this;
+        _this.state = {
+            name: "",
+            nameValidationClass: "",
+            nameHelpText: "",
+            numberOfQuestions: 10
+        };
         _this.beginTestClick = _this.beginTestClick.bind(_this);
+        _this.nameChange = _this.nameChange.bind(_this);
+        _this.numberOfQuestionsChange = _this.numberOfQuestionsChange.bind(_this);
         return _this;
     }
     Welcome.prototype.beginTestClick = function () {
-        this.props.beginTest();
+        if (!this.state.name) {
+            this.setState({
+                nameValidationClass: "has-error",
+                nameHelpText: "Please enter your name"
+            });
+            return;
+        }
+        this.props.beginTest(this.state.name, this.state.numberOfQuestions);
+    };
+    Welcome.prototype.nameChange = function (event) {
+        this.setState({
+            name: event.currentTarget.value,
+            nameValidationClass: event.currentTarget.value ? "has-success" : "has-error",
+            nameHelpText: event.currentTarget.value ? "" : "Please enter your name"
+        });
+    };
+    Welcome.prototype.numberOfQuestionsChange = function (event) {
+        this.setState({ numberOfQuestions: parseInt(event.currentTarget.value, 10) });
     };
     Welcome.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("h3", null, "Welcome to the Synonym Test"),
-            React.createElement("a", { className: "btn btn-primary", onClick: this.beginTestClick }, "Begin Test")));
+            React.createElement("form", { className: "form-horizontal" },
+                React.createElement(formGroup_1.FormGroup, { for: "name", label: "Name", validationClass: this.state.nameValidationClass, helpText: this.state.nameHelpText },
+                    React.createElement("input", { type: "text", className: "form-control", id: "name", placeholder: "Name", onChange: this.nameChange })),
+                React.createElement(formGroup_1.FormGroup, { for: "numberOfQuestions", label: "No. of Questions" },
+                    React.createElement("select", { className: "form-control", id: "numberOfQuestions", onChange: this.numberOfQuestionsChange },
+                        React.createElement("option", null, "5"),
+                        React.createElement("option", null, "10"),
+                        React.createElement("option", null, "15"),
+                        React.createElement("option", null, "20"))),
+                React.createElement(formGroup_1.FormGroup, { for: "", label: "" },
+                    React.createElement("a", { className: "btn btn-primary", onClick: this.beginTestClick }, "Begin Test")))));
     };
     return Welcome;
 }(React.Component));
@@ -1079,7 +1168,7 @@ exports.Welcome = Welcome;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

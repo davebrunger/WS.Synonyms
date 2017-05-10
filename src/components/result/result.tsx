@@ -3,6 +3,7 @@ import * as React from "react";
 import { IScore } from "../test/score"
 
 export interface ResultProps {
+    name: string;
     restartTest(): void;
     score: IScore;
 }
@@ -22,7 +23,7 @@ export class Result extends React.Component<ResultProps, {}>{
         return (
             <div>
                 <h3>Results</h3>
-                <p>You answered {this.props.score.correctAnswers} of {this.props.score.questionsAnswered} questions correctly. Well done!</p>
+                <p>{this.props.name}, you answered {this.props.score.correctAnswers} of {this.props.score.questionsAnswered} questions correctly. Well done!</p>
                 <a className="btn btn-primary" onClick={this.restartTest}>Restart Test</a>
             </div>
         );
