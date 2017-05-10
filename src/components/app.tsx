@@ -3,17 +3,20 @@ import * as React from "react";
 import { Welcome } from "./welcome/welcome";
 import { Test } from "./test/test";
 import { Result } from "./result/result";
-import { IScore } from "./test/score"
+import { IScore } from "./test/score";
+import { SynonymQuestionProvider } from "./test/synonymQuestionProvider";
 
 export class AppState {
     questionNumber?: number;
     score?: IScore;
-    numberOfQuestions? : number;
+    numberOfQuestions?: number;
     name?: string;
 }
 
 export class App extends React.Component<{}, AppState>
 {
+    private questionProvider = new SynonymQuestionProvider();
+
     constructor(props: any) {
         super(props);
 
@@ -31,8 +34,8 @@ export class App extends React.Component<{}, AppState>
         this.setState({
             questionNumber: 1,
             score: null,
-            numberOfQuestions : numberOfQuestions,
-            name : name
+            numberOfQuestions: numberOfQuestions,
+            name: name
         });
     }
 
@@ -72,12 +75,13 @@ export class App extends React.Component<{}, AppState>
             );
         } else {
             return (
-                <Test 
+                <Test
                     numberOfQuestions={this.state.numberOfQuestions}
-                    questionNumber={this.state.questionNumber} 
-                    nextQuestion={this.nextQuestion} 
-                    score={this.state.score} 
-                    updateScore={this.updateScore} />
+                    questionNumber={this.state.questionNumber}
+                    nextQuestion={this.nextQuestion}
+                    score={this.state.score}
+                    updateScore={this.updateScore}
+                    questionProvider={this.questionProvider} />
             );
         }
     }

@@ -2,18 +2,18 @@ import * as React from "react";
 
 import { Words } from "./words"
 import { IScore } from "./score"
+import { IQuestion } from "./question"
 
-export interface AnswerProps {
-    wordOptions: string[];
-    correctOption: number;
+export interface AnswerDisplayProps {
     selectedOption: number;
     nextQuestion(): void;
     score: IScore;
+    question : IQuestion;
 }
 
-export class Answer extends React.Component<AnswerProps, {}>{
+export class AnswerDisplay extends React.Component<AnswerDisplayProps, {}>{
 
-    constructor(props: AnswerProps) {
+    constructor(props: AnswerDisplayProps) {
         super(props);
         this.nextQuestion = this.nextQuestion.bind(this);
     }
@@ -24,7 +24,7 @@ export class Answer extends React.Component<AnswerProps, {}>{
 
     render() {
 
-        var buttons = this.props.wordOptions
+        var buttons = this.props.question.answers
             .map((s, i) => {
                 // assume there are always 5 options
                 var divClass = "btn-question col-sm-2";
@@ -32,7 +32,7 @@ export class Answer extends React.Component<AnswerProps, {}>{
                     divClass = divClass + " col-sm-offset-1";
                 }
                 var buttonClass = "btn center-block";
-                if (i === this.props.correctOption) {
+                if (i === this.props.question.correctAnswerIndex) {
                     buttonClass = buttonClass + " btn-success"
                 }
                 else if (i === this.props.selectedOption) {
@@ -48,9 +48,9 @@ export class Answer extends React.Component<AnswerProps, {}>{
                 );
             });
 
-        var message = this.props.correctOption === this.props.selectedOption
+        var message = this.props.question.correctAnswerIndex === this.props.selectedOption
             ? "You answered correctly, well done!"
-            : "You answered incorrectly. The correct answer was " + this.props.wordOptions[this.props.correctOption] + " Better luck next time."
+            : "You answered incorrectly. The correct answer was " + this.props.question.answers[this.props.question.correctAnswerIndex] + " Better luck next time."
 
         var score = this.props.score
             ? <p>Score: {this.props.score.correctAnswers} out of {this.props.score.questionsAnswered}.</p>

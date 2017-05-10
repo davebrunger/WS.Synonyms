@@ -3,15 +3,15 @@ import * as React from "react";
 import { Words } from "./words"
 import { IScore } from "./score"
 
-export interface QuestionProps {
+export interface QuestionDisplayProps {
     wordOptions: string[];
     selectOption(option: number): void;
     score: IScore;
 }
 
-export class Question extends React.Component<QuestionProps, {}>{
+export class QuestionDisplay extends React.Component<QuestionDisplayProps, {}>{
 
-    constructor(props: QuestionProps) {
+    constructor(props: QuestionDisplayProps) {
         super(props);
         this.selectOption = this.selectOption.bind(this);
     }

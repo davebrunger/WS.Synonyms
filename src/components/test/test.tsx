@@ -1,9 +1,10 @@
 import * as React from "react";
 
-import { Words } from "./words";
-import { Question } from "./question";
-import { Answer } from "./answer";
+import { QuestionDisplay } from "./questionDisplay";
+import { AnswerDisplay } from "./answerDisplay";
 import { IScore } from "./score";
+import { IQuestion } from "./question"
+import { IQuestionProvider } from "./questionProvider"
 
 export interface TestProps {
     numberOfQuestions: number;
@@ -11,14 +12,13 @@ export interface TestProps {
     nextQuestion(): void;
     score: IScore;
     updateScore(correct: boolean): void;
+    questionProvider: IQuestionProvider;
 }
 
 export interface TestState {
     questionNumber?: number;
     selectedOption?: number;
-    word?: string;
-    wordOptions?: string[];
-    correctOption?: number;
+    question?: IQuestion;
 }
 
 export class Test extends React.Component<TestProps, TestState>{
@@ -36,55 +36,23 @@ export class Test extends React.Component<TestProps, TestState>{
         this.props.nextQuestion();
     }
 
-    random(maxValueExclusive: number) {
-        return Math.floor(Math.random() * maxValueExclusive);
-    }
-
     selectOption(option: number) {
-        this.props.updateScore(option === this.state.correctOption);
+        this.props.updateScore(option === this.state.question.correctAnswerIndex);
         this.setState({
             selectedOption: option
         });
     }
 
     getRefreshedState(questionNumber: number) {
-
-        var word: string = null;
-        var wordOptions: string[] = null;
-        var correctOption: number = null;
-
+        var question = null;
         if (questionNumber === 0 || questionNumber > 0) {
-            var words = Words.getWords();
-            this.shuffle(words);
-            var synonyms = words[0];
-            this.shuffle(synonyms);
-            word = synonyms[0];
-            wordOptions = [synonyms[1]];
-            for (var i = 1; i < 5; i++) {
-                var antonyms = words[i];
-                this.shuffle(antonyms);
-                wordOptions.push(antonyms[0]);
-            }
-            this.shuffle(wordOptions);
-            correctOption = wordOptions.indexOf(synonyms[1]);
+            question = this.props.questionProvider.getNextQuestion();
         }
-
         return {
             questionNumber: questionNumber,
             selectedOption: null,
-            word: word,
-            wordOptions: wordOptions,
-            correctOption: correctOption,
+            question : question
         } as TestState;
-    }
-
-    shuffle(source: any[]) {
-        for (var i = source.length - 1; i > 0; i--) {
-            var n = this.random(i + 1);
-            var temp = source[i];
-            source[i] = source[n];
-            source[n] = temp;
-        }
     }
 
     componentWillReceiveProps(nextProps: TestProps) {
@@ -98,18 +66,17 @@ export class Test extends React.Component<TestProps, TestState>{
         var answered = this.state.selectedOption === 0 || this.state.selectedOption > 0;
 
         var questionOrResult = answered
-            ? <Answer
-                correctOption={this.state.correctOption}
+            ? <AnswerDisplay
                 nextQuestion={this.nextQuestion}
                 selectedOption={this.state.selectedOption}
-                wordOptions={this.state.wordOptions}
-                score={this.props.score} />
-            : <Question wordOptions={this.state.wordOptions} selectOption={this.selectOption} score={this.props.score} />;
+                score={this.props.score} 
+                question={this.state.question}/>
+            : <QuestionDisplay wordOptions={this.state.question.answers} selectOption={this.selectOption} score={this.props.score} />;
 
         return (
             <div>
                 <h3>Question {this.props.questionNumber} of {this.props.numberOfQuestions}</h3>
-                <p>Click or tap the word that is a synonym of {this.state.word}</p>
+                {this.state.question.question}
                 {questionOrResult}
             </div>
         );

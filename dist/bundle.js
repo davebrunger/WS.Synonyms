@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -90,9 +90,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var welcome_1 = __webpack_require__(9);
-var test_1 = __webpack_require__(7);
+var welcome_1 = __webpack_require__(10);
+var test_1 = __webpack_require__(8);
 var result_1 = __webpack_require__(4);
+var synonymQuestionProvider_1 = __webpack_require__(7);
 var AppState = (function () {
     function AppState() {
     }
@@ -103,6 +104,7 @@ var App = (function (_super) {
     __extends(App, _super);
     function App(props) {
         var _this = _super.call(this, props) || this;
+        _this.questionProvider = new synonymQuestionProvider_1.SynonymQuestionProvider();
         _this.state = {
             questionNumber: 0
         };
@@ -150,7 +152,7 @@ var App = (function (_super) {
             return (React.createElement(result_1.Result, { name: this.state.name, restartTest: this.restartTest, score: this.state.score }));
         }
         else {
-            return (React.createElement(test_1.Test, { numberOfQuestions: this.state.numberOfQuestions, questionNumber: this.state.questionNumber, nextQuestion: this.nextQuestion, score: this.state.score, updateScore: this.updateScore }));
+            return (React.createElement(test_1.Test, { numberOfQuestions: this.state.numberOfQuestions, questionNumber: this.state.questionNumber, nextQuestion: this.nextQuestion, score: this.state.score, updateScore: this.updateScore, questionProvider: this.questionProvider }));
         }
     };
     return App;
@@ -269,19 +271,19 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var Answer = (function (_super) {
-    __extends(Answer, _super);
-    function Answer(props) {
+var AnswerDisplay = (function (_super) {
+    __extends(AnswerDisplay, _super);
+    function AnswerDisplay(props) {
         var _this = _super.call(this, props) || this;
         _this.nextQuestion = _this.nextQuestion.bind(_this);
         return _this;
     }
-    Answer.prototype.nextQuestion = function () {
+    AnswerDisplay.prototype.nextQuestion = function () {
         this.props.nextQuestion();
     };
-    Answer.prototype.render = function () {
+    AnswerDisplay.prototype.render = function () {
         var _this = this;
-        var buttons = this.props.wordOptions
+        var buttons = this.props.question.answers
             .map(function (s, i) {
             // assume there are always 5 options
             var divClass = "btn-question col-sm-2";
@@ -289,7 +291,7 @@ var Answer = (function (_super) {
                 divClass = divClass + " col-sm-offset-1";
             }
             var buttonClass = "btn center-block";
-            if (i === _this.props.correctOption) {
+            if (i === _this.props.question.correctAnswerIndex) {
                 buttonClass = buttonClass + " btn-success";
             }
             else if (i === _this.props.selectedOption) {
@@ -301,9 +303,9 @@ var Answer = (function (_super) {
             return (React.createElement("div", { className: divClass, key: i },
                 React.createElement("a", { className: buttonClass }, s)));
         });
-        var message = this.props.correctOption === this.props.selectedOption
+        var message = this.props.question.correctAnswerIndex === this.props.selectedOption
             ? "You answered correctly, well done!"
-            : "You answered incorrectly. The correct answer was " + this.props.wordOptions[this.props.correctOption] + " Better luck next time.";
+            : "You answered incorrectly. The correct answer was " + this.props.question.answers[this.props.question.correctAnswerIndex] + " Better luck next time.";
         var score = this.props.score
             ? React.createElement("p", null,
                 "Score: ",
@@ -318,9 +320,9 @@ var Answer = (function (_super) {
             React.createElement("p", null, message),
             React.createElement("a", { className: "btn btn-primary", onClick: this.nextQuestion }, "Next")));
     };
-    return Answer;
+    return AnswerDisplay;
 }(React.Component));
-exports.Answer = Answer;
+exports.AnswerDisplay = AnswerDisplay;
 
 
 /***/ }),
@@ -341,19 +343,19 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var Question = (function (_super) {
-    __extends(Question, _super);
-    function Question(props) {
+var QuestionDisplay = (function (_super) {
+    __extends(QuestionDisplay, _super);
+    function QuestionDisplay(props) {
         var _this = _super.call(this, props) || this;
         _this.selectOption = _this.selectOption.bind(_this);
         return _this;
     }
-    Question.prototype.selectOption = function (event) {
+    QuestionDisplay.prototype.selectOption = function (event) {
         var anchorElement = event.currentTarget;
         var index = parseInt(anchorElement.id.substr(4), 10);
         this.props.selectOption(index);
     };
-    Question.prototype.render = function () {
+    QuestionDisplay.prototype.render = function () {
         var _this = this;
         var buttons = this.props.wordOptions
             .map(function (s, i) {
@@ -377,13 +379,62 @@ var Question = (function (_super) {
             React.createElement("div", { className: "row" }, buttons),
             score));
     };
-    return Question;
+    return QuestionDisplay;
 }(React.Component));
-exports.Question = Question;
+exports.QuestionDisplay = QuestionDisplay;
 
 
 /***/ }),
 /* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(0);
+var words_1 = __webpack_require__(9);
+var SynonymQuestionProvider = (function () {
+    function SynonymQuestionProvider() {
+    }
+    SynonymQuestionProvider.prototype.shuffle = function (source) {
+        for (var i = source.length - 1; i > 0; i--) {
+            var n = this.random(i + 1);
+            var temp = source[i];
+            source[i] = source[n];
+            source[n] = temp;
+        }
+    };
+    SynonymQuestionProvider.prototype.random = function (maxValueExclusive) {
+        return Math.floor(Math.random() * maxValueExclusive);
+    };
+    SynonymQuestionProvider.prototype.getNextQuestion = function () {
+        var words = words_1.Words.getWords();
+        this.shuffle(words);
+        var synonyms = words[0];
+        this.shuffle(synonyms);
+        var word = synonyms[0];
+        var answers = [synonyms[1]];
+        for (var i = 1; i < 5; i++) {
+            var antonyms = words[i];
+            this.shuffle(antonyms);
+            answers.push(antonyms[0]);
+        }
+        this.shuffle(answers);
+        return {
+            question: React.createElement("p", null,
+                "Click or tap the word that is a synonym of ",
+                word),
+            answers: answers,
+            correctAnswerIndex: answers.indexOf(synonyms[1]),
+        };
+    };
+    return SynonymQuestionProvider;
+}());
+exports.SynonymQuestionProvider = SynonymQuestionProvider;
+
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -400,9 +451,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var words_1 = __webpack_require__(8);
-var question_1 = __webpack_require__(6);
-var answer_1 = __webpack_require__(5);
+var questionDisplay_1 = __webpack_require__(6);
+var answerDisplay_1 = __webpack_require__(5);
 var Test = (function (_super) {
     __extends(Test, _super);
     function Test(props) {
@@ -415,49 +465,22 @@ var Test = (function (_super) {
     Test.prototype.nextQuestion = function () {
         this.props.nextQuestion();
     };
-    Test.prototype.random = function (maxValueExclusive) {
-        return Math.floor(Math.random() * maxValueExclusive);
-    };
     Test.prototype.selectOption = function (option) {
-        this.props.updateScore(option === this.state.correctOption);
+        this.props.updateScore(option === this.state.question.correctAnswerIndex);
         this.setState({
             selectedOption: option
         });
     };
     Test.prototype.getRefreshedState = function (questionNumber) {
-        var word = null;
-        var wordOptions = null;
-        var correctOption = null;
+        var question = null;
         if (questionNumber === 0 || questionNumber > 0) {
-            var words = words_1.Words.getWords();
-            this.shuffle(words);
-            var synonyms = words[0];
-            this.shuffle(synonyms);
-            word = synonyms[0];
-            wordOptions = [synonyms[1]];
-            for (var i = 1; i < 5; i++) {
-                var antonyms = words[i];
-                this.shuffle(antonyms);
-                wordOptions.push(antonyms[0]);
-            }
-            this.shuffle(wordOptions);
-            correctOption = wordOptions.indexOf(synonyms[1]);
+            question = this.props.questionProvider.getNextQuestion();
         }
         return {
             questionNumber: questionNumber,
             selectedOption: null,
-            word: word,
-            wordOptions: wordOptions,
-            correctOption: correctOption,
+            question: question
         };
-    };
-    Test.prototype.shuffle = function (source) {
-        for (var i = source.length - 1; i > 0; i--) {
-            var n = this.random(i + 1);
-            var temp = source[i];
-            source[i] = source[n];
-            source[n] = temp;
-        }
     };
     Test.prototype.componentWillReceiveProps = function (nextProps) {
         if (nextProps.questionNumber !== this.state.questionNumber) {
@@ -467,17 +490,15 @@ var Test = (function (_super) {
     Test.prototype.render = function () {
         var answered = this.state.selectedOption === 0 || this.state.selectedOption > 0;
         var questionOrResult = answered
-            ? React.createElement(answer_1.Answer, { correctOption: this.state.correctOption, nextQuestion: this.nextQuestion, selectedOption: this.state.selectedOption, wordOptions: this.state.wordOptions, score: this.props.score })
-            : React.createElement(question_1.Question, { wordOptions: this.state.wordOptions, selectOption: this.selectOption, score: this.props.score });
+            ? React.createElement(answerDisplay_1.AnswerDisplay, { nextQuestion: this.nextQuestion, selectedOption: this.state.selectedOption, score: this.props.score, question: this.state.question })
+            : React.createElement(questionDisplay_1.QuestionDisplay, { wordOptions: this.state.question.answers, selectOption: this.selectOption, score: this.props.score });
         return (React.createElement("div", null,
             React.createElement("h3", null,
                 "Question ",
                 this.props.questionNumber,
                 " of ",
                 this.props.numberOfQuestions),
-            React.createElement("p", null,
-                "Click or tap the word that is a synonym of ",
-                this.state.word),
+            this.state.question.question,
             questionOrResult));
     };
     return Test;
@@ -486,7 +507,7 @@ exports.Test = Test;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1094,7 +1115,7 @@ exports.Words = Words;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1168,7 +1189,7 @@ exports.Welcome = Welcome;
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
