@@ -4,19 +4,20 @@ import { Welcome } from "./welcome/welcome";
 import { Test } from "./test/test";
 import { Result } from "./result/result";
 import { IScore } from "./test/score";
+import { IQuestionProvider } from "./test/questionProvider";
 import { SynonymQuestionProvider } from "./test/synonymQuestionProvider";
+import { TimesTablesQuestionProvider } from "./test/timesTablesQuestionProvider";
 
 export class AppState {
     questionNumber?: number;
     score?: IScore;
     numberOfQuestions?: number;
     name?: string;
+    questionProvider?: IQuestionProvider;
 }
 
 export class App extends React.Component<{}, AppState>
 {
-    private questionProvider = new SynonymQuestionProvider();
-
     constructor(props: any) {
         super(props);
 
@@ -30,23 +31,26 @@ export class App extends React.Component<{}, AppState>
         this.updateScore = this.updateScore.bind(this);
     }
 
-    beginTest(name: string, numberOfQuestions: number) {
+    private beginTest(name: string, typeOfTest : string, numberOfQuestions: number) {
         this.setState({
             questionNumber: 1,
             score: null,
             numberOfQuestions: numberOfQuestions,
-            name: name
+            name: name,
+            questionProvider : typeOfTest === "Synonyms"
+                ? new SynonymQuestionProvider()
+                : new TimesTablesQuestionProvider(12)
         });
     }
 
-    restartTest() {
+    private restartTest() {
         this.setState({
             questionNumber: 1,
             score: null
         });
     }
 
-    updateScore(correct: boolean) {
+    private updateScore(correct: boolean) {
         var score = this.state.score || {
             correctAnswers: 0,
             questionsAnswered: 0
@@ -58,13 +62,13 @@ export class App extends React.Component<{}, AppState>
         });
     }
 
-    nextQuestion() {
+    private nextQuestion() {
         this.setState({
             questionNumber: this.state.questionNumber + 1,
         });
     }
 
-    render() {
+    public render() {
         if (this.state.questionNumber < 1) {
             return (
                 <Welcome beginTest={this.beginTest} />
@@ -81,7 +85,7 @@ export class App extends React.Component<{}, AppState>
                     nextQuestion={this.nextQuestion}
                     score={this.state.score}
                     updateScore={this.updateScore}
-                    questionProvider={this.questionProvider} />
+                    questionProvider={this.state.questionProvider} />
             );
         }
     }

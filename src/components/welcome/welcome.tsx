@@ -3,7 +3,7 @@ import * as React from "react";
 import { FormGroup } from "../forms/formGroup"
 
 export interface WelcomeProps {
-    beginTest(name: string, numberOfQuestions: number): void;
+    beginTest(name: string, typeOfTest: string, numberOfQuestions: number): void;
 }
 
 export interface WelcomeState {
@@ -11,6 +11,7 @@ export interface WelcomeState {
     nameValidationClass?: string;
     nameHelpText?: string;
     numberOfQuestions?: number;
+    typeOfTest?: string;
 }
 
 export class Welcome extends React.Component<WelcomeProps, WelcomeState>{
@@ -22,12 +23,14 @@ export class Welcome extends React.Component<WelcomeProps, WelcomeState>{
             name: "",
             nameValidationClass: "",
             nameHelpText: "",
-            numberOfQuestions: 10
+            numberOfQuestions: 10,
+            typeOfTest: "Synonyms"
         }
 
         this.beginTestClick = this.beginTestClick.bind(this);
         this.nameChange = this.nameChange.bind(this);
         this.numberOfQuestionsChange = this.numberOfQuestionsChange.bind(this);
+        this.typeOfTestChange = this.typeOfTestChange.bind(this);
     }
 
     beginTestClick() {
@@ -36,9 +39,9 @@ export class Welcome extends React.Component<WelcomeProps, WelcomeState>{
                 nameValidationClass: "has-error",
                 nameHelpText: "Please enter your name"
             });
-            return;            
+            return;
         }
-        this.props.beginTest(this.state.name, this.state.numberOfQuestions);
+        this.props.beginTest(this.state.name, this.state.typeOfTest, this.state.numberOfQuestions);
     }
 
     nameChange(event: React.FormEvent<HTMLInputElement>) {
@@ -53,20 +56,30 @@ export class Welcome extends React.Component<WelcomeProps, WelcomeState>{
         this.setState({ numberOfQuestions: parseInt(event.currentTarget.value, 10) });
     }
 
+    typeOfTestChange(event: React.FormEvent<HTMLSelectElement>) {
+        this.setState({ typeOfTest: event.currentTarget.value });
+    }
+
     render() {
         return (
             <div>
-                <h3>Welcome to the Synonym Test</h3>
+                <h3>Welcome to the Simple Online Tester</h3>
                 <form className="form-horizontal">
                     <FormGroup for="name" label="Name" validationClass={this.state.nameValidationClass} helpText={this.state.nameHelpText}>
-                        <input type="text" className="form-control" id="name" placeholder="Name" onChange={this.nameChange} />
+                        <input type="text" className="form-control" id="name" placeholder="Name" value={this.state.name} onChange={this.nameChange} />
                     </FormGroup>
                     <FormGroup for="numberOfQuestions" label="No. of Questions">
-                        <select className="form-control" id="numberOfQuestions" onChange={this.numberOfQuestionsChange}>
+                        <select className="form-control" id="numberOfQuestions" value={this.state.numberOfQuestions} onChange={this.numberOfQuestionsChange}>
                             <option>5</option>
                             <option>10</option>
                             <option>15</option>
                             <option>20</option>
+                        </select>
+                    </FormGroup>
+                    <FormGroup for="typeOfTest" label="Type of Test">
+                        <select className="form-control" id="typeOfTest" value={this.state.typeOfTest} onChange={this.typeOfTestChange}>
+                            <option>Synonyms</option>
+                            <option>Times Tables</option>
                         </select>
                     </FormGroup>
                     <FormGroup for="" label="">

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 14);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,6 +74,56 @@ module.exports = React;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var randomizer_1 = __webpack_require__(2);
+var ArrayUtils = (function () {
+    function ArrayUtils() {
+    }
+    ArrayUtils.range = function (maxValueExclusive) {
+        return Array.apply(null, { length: maxValueExclusive }).map(Number.call, Number);
+    };
+    ArrayUtils.shuffle = function (source) {
+        var indexes = ArrayUtils.range(source.length);
+        for (var i = indexes.length - 1; i > 0; i--) {
+            var n = randomizer_1.Randomizer.random(i + 1);
+            var temp = indexes[i];
+            indexes[i] = indexes[n];
+            indexes[n] = temp;
+        }
+        return indexes.map(function (n) { return source[n]; });
+    };
+    ArrayUtils.distinct = function (source) {
+        return source.filter(function (value, index, self) { return self.indexOf(value) === index; });
+    };
+    return ArrayUtils;
+}());
+exports.ArrayUtils = ArrayUtils;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Randomizer = (function () {
+    function Randomizer() {
+    }
+    Randomizer.random = function (maxValueExclusive) {
+        return Math.floor(Math.random() * maxValueExclusive);
+    };
+    return Randomizer;
+}());
+exports.Randomizer = Randomizer;
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -90,10 +140,11 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var welcome_1 = __webpack_require__(10);
-var test_1 = __webpack_require__(8);
-var result_1 = __webpack_require__(4);
-var synonymQuestionProvider_1 = __webpack_require__(7);
+var welcome_1 = __webpack_require__(13);
+var test_1 = __webpack_require__(10);
+var result_1 = __webpack_require__(6);
+var synonymQuestionProvider_1 = __webpack_require__(9);
+var timesTablesQuestionProvider_1 = __webpack_require__(11);
 var AppState = (function () {
     function AppState() {
     }
@@ -104,7 +155,6 @@ var App = (function (_super) {
     __extends(App, _super);
     function App(props) {
         var _this = _super.call(this, props) || this;
-        _this.questionProvider = new synonymQuestionProvider_1.SynonymQuestionProvider();
         _this.state = {
             questionNumber: 0
         };
@@ -114,12 +164,15 @@ var App = (function (_super) {
         _this.updateScore = _this.updateScore.bind(_this);
         return _this;
     }
-    App.prototype.beginTest = function (name, numberOfQuestions) {
+    App.prototype.beginTest = function (name, typeOfTest, numberOfQuestions) {
         this.setState({
             questionNumber: 1,
             score: null,
             numberOfQuestions: numberOfQuestions,
-            name: name
+            name: name,
+            questionProvider: typeOfTest === "Synonyms"
+                ? new synonymQuestionProvider_1.SynonymQuestionProvider()
+                : new timesTablesQuestionProvider_1.TimesTablesQuestionProvider(12)
         });
     };
     App.prototype.restartTest = function () {
@@ -152,7 +205,7 @@ var App = (function (_super) {
             return (React.createElement(result_1.Result, { name: this.state.name, restartTest: this.restartTest, score: this.state.score }));
         }
         else {
-            return (React.createElement(test_1.Test, { numberOfQuestions: this.state.numberOfQuestions, questionNumber: this.state.questionNumber, nextQuestion: this.nextQuestion, score: this.state.score, updateScore: this.updateScore, questionProvider: this.questionProvider }));
+            return (React.createElement(test_1.Test, { numberOfQuestions: this.state.numberOfQuestions, questionNumber: this.state.questionNumber, nextQuestion: this.nextQuestion, score: this.state.score, updateScore: this.updateScore, questionProvider: this.state.questionProvider }));
         }
     };
     return App;
@@ -161,13 +214,13 @@ exports.App = App;
 
 
 /***/ }),
-/* 2 */
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = ReactDOM;
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -209,7 +262,7 @@ exports.FormGroup = FormGroup;
 
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -254,7 +307,7 @@ exports.Result = Result;
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -326,7 +379,7 @@ exports.AnswerDisplay = AnswerDisplay;
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -385,41 +438,27 @@ exports.QuestionDisplay = QuestionDisplay;
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var words_1 = __webpack_require__(9);
+var words_1 = __webpack_require__(12);
+var arrayUtils_1 = __webpack_require__(1);
 var SynonymQuestionProvider = (function () {
     function SynonymQuestionProvider() {
     }
-    SynonymQuestionProvider.prototype.shuffle = function (source) {
-        for (var i = source.length - 1; i > 0; i--) {
-            var n = this.random(i + 1);
-            var temp = source[i];
-            source[i] = source[n];
-            source[n] = temp;
-        }
-    };
-    SynonymQuestionProvider.prototype.random = function (maxValueExclusive) {
-        return Math.floor(Math.random() * maxValueExclusive);
-    };
     SynonymQuestionProvider.prototype.getNextQuestion = function () {
-        var words = words_1.Words.getWords();
-        this.shuffle(words);
-        var synonyms = words[0];
-        this.shuffle(synonyms);
+        var words = arrayUtils_1.ArrayUtils.shuffle(words_1.Words.getWords());
+        var synonyms = arrayUtils_1.ArrayUtils.shuffle(words[0]);
         var word = synonyms[0];
         var answers = [synonyms[1]];
         for (var i = 1; i < 5; i++) {
-            var antonyms = words[i];
-            this.shuffle(antonyms);
-            answers.push(antonyms[0]);
+            answers.push(arrayUtils_1.ArrayUtils.shuffle(words[i])[0]);
         }
-        this.shuffle(answers);
+        answers = arrayUtils_1.ArrayUtils.shuffle(answers);
         return {
             question: React.createElement("p", null,
                 "Click or tap the word that is a synonym of ",
@@ -434,7 +473,7 @@ exports.SynonymQuestionProvider = SynonymQuestionProvider;
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -451,8 +490,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var questionDisplay_1 = __webpack_require__(6);
-var answerDisplay_1 = __webpack_require__(5);
+var questionDisplay_1 = __webpack_require__(8);
+var answerDisplay_1 = __webpack_require__(7);
 var Test = (function (_super) {
     __extends(Test, _super);
     function Test(props) {
@@ -507,7 +546,80 @@ exports.Test = Test;
 
 
 /***/ }),
-/* 9 */
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(0);
+var arrayUtils_1 = __webpack_require__(1);
+var randomizer_1 = __webpack_require__(2);
+var TimesTablesQuestionProvider = (function () {
+    function TimesTablesQuestionProvider(maxNumber) {
+        this.maxNumber = maxNumber;
+    }
+    TimesTablesQuestionProvider.prototype.getMaxNumber = function () {
+        return this.maxNumber;
+    };
+    TimesTablesQuestionProvider.prototype.getNextQuestion = function () {
+        var x = randomizer_1.Randomizer.random(this.maxNumber) + 1;
+        var y = randomizer_1.Randomizer.random(this.maxNumber) + 1;
+        var answers = [x * y];
+        var incorrectAnswers = [];
+        incorrectAnswers.push(answers[0] - 2);
+        incorrectAnswers.push(answers[0] - 1);
+        incorrectAnswers.push(answers[0] + 1);
+        incorrectAnswers.push(answers[0] + 2);
+        incorrectAnswers.push((x - 2) * (y - 2));
+        incorrectAnswers.push((x - 1) * (y - 2));
+        incorrectAnswers.push(x * (y - 2));
+        incorrectAnswers.push((x + 1) * (y - 2));
+        incorrectAnswers.push((x + 2) * (y - 2));
+        incorrectAnswers.push((x - 2) * (y - 1));
+        incorrectAnswers.push((x - 1) * (y - 1));
+        incorrectAnswers.push(x * (y - 1));
+        incorrectAnswers.push((x + 1) * (y - 1));
+        incorrectAnswers.push((x + 2) * (y - 1));
+        incorrectAnswers.push((x - 2) * y);
+        incorrectAnswers.push((x - 1) * y);
+        incorrectAnswers.push((x + 1) * y);
+        incorrectAnswers.push((x + 2) * y);
+        incorrectAnswers.push((x - 2) * (y + 1));
+        incorrectAnswers.push((x - 1) * (y + 1));
+        incorrectAnswers.push(x * (y + 2));
+        incorrectAnswers.push((x + 1) * (y + 1));
+        incorrectAnswers.push((x + 2) * (y + 1));
+        incorrectAnswers.push((x - 2) * (y + 2));
+        incorrectAnswers.push((x - 1) * (y + 2));
+        incorrectAnswers.push(x * (y + 2));
+        incorrectAnswers.push((x + 1) * (y + 2));
+        incorrectAnswers.push((x + 2) * (y + 2));
+        incorrectAnswers = incorrectAnswers.filter(function (n) { return n > 0; });
+        incorrectAnswers = arrayUtils_1.ArrayUtils.distinct(incorrectAnswers);
+        incorrectAnswers = arrayUtils_1.ArrayUtils.shuffle(incorrectAnswers);
+        for (var i = 0; i < 4; i++) {
+            answers.push(incorrectAnswers[i]);
+        }
+        answers = arrayUtils_1.ArrayUtils.shuffle(answers);
+        return {
+            question: React.createElement("p", null,
+                "Click or tap the number answer to ",
+                x,
+                " x ",
+                y,
+                " ="),
+            answers: answers.map(function (n) { return n.toString(); }),
+            correctAnswerIndex: answers.indexOf(x * y),
+        };
+    };
+    return TimesTablesQuestionProvider;
+}());
+exports.TimesTablesQuestionProvider = TimesTablesQuestionProvider;
+
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1115,7 +1227,7 @@ exports.Words = Words;
 
 
 /***/ }),
-/* 10 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1132,7 +1244,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var formGroup_1 = __webpack_require__(3);
+var formGroup_1 = __webpack_require__(5);
 var Welcome = (function (_super) {
     __extends(Welcome, _super);
     function Welcome(props) {
@@ -1141,11 +1253,13 @@ var Welcome = (function (_super) {
             name: "",
             nameValidationClass: "",
             nameHelpText: "",
-            numberOfQuestions: 10
+            numberOfQuestions: 10,
+            typeOfTest: "Synonyms"
         };
         _this.beginTestClick = _this.beginTestClick.bind(_this);
         _this.nameChange = _this.nameChange.bind(_this);
         _this.numberOfQuestionsChange = _this.numberOfQuestionsChange.bind(_this);
+        _this.typeOfTestChange = _this.typeOfTestChange.bind(_this);
         return _this;
     }
     Welcome.prototype.beginTestClick = function () {
@@ -1156,7 +1270,7 @@ var Welcome = (function (_super) {
             });
             return;
         }
-        this.props.beginTest(this.state.name, this.state.numberOfQuestions);
+        this.props.beginTest(this.state.name, this.state.typeOfTest, this.state.numberOfQuestions);
     };
     Welcome.prototype.nameChange = function (event) {
         this.setState({
@@ -1168,18 +1282,25 @@ var Welcome = (function (_super) {
     Welcome.prototype.numberOfQuestionsChange = function (event) {
         this.setState({ numberOfQuestions: parseInt(event.currentTarget.value, 10) });
     };
+    Welcome.prototype.typeOfTestChange = function (event) {
+        this.setState({ typeOfTest: event.currentTarget.value });
+    };
     Welcome.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("h3", null, "Welcome to the Synonym Test"),
             React.createElement("form", { className: "form-horizontal" },
                 React.createElement(formGroup_1.FormGroup, { for: "name", label: "Name", validationClass: this.state.nameValidationClass, helpText: this.state.nameHelpText },
-                    React.createElement("input", { type: "text", className: "form-control", id: "name", placeholder: "Name", onChange: this.nameChange })),
+                    React.createElement("input", { type: "text", className: "form-control", id: "name", placeholder: "Name", value: this.state.name, onChange: this.nameChange })),
                 React.createElement(formGroup_1.FormGroup, { for: "numberOfQuestions", label: "No. of Questions" },
-                    React.createElement("select", { className: "form-control", id: "numberOfQuestions", onChange: this.numberOfQuestionsChange },
+                    React.createElement("select", { className: "form-control", id: "numberOfQuestions", value: this.state.numberOfQuestions, onChange: this.numberOfQuestionsChange },
                         React.createElement("option", null, "5"),
                         React.createElement("option", null, "10"),
                         React.createElement("option", null, "15"),
                         React.createElement("option", null, "20"))),
+                React.createElement(formGroup_1.FormGroup, { for: "typeOfTest", label: "Type of Test" },
+                    React.createElement("select", { className: "form-control", id: "typeOfTest", value: this.state.typeOfTest, onChange: this.typeOfTestChange },
+                        React.createElement("option", null, "Synonyms"),
+                        React.createElement("option", null, "Times Tables"))),
                 React.createElement(formGroup_1.FormGroup, { for: "", label: "" },
                     React.createElement("a", { className: "btn btn-primary", onClick: this.beginTestClick }, "Begin Test")))));
     };
@@ -1189,15 +1310,15 @@ exports.Welcome = Welcome;
 
 
 /***/ }),
-/* 11 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var ReactDOM = __webpack_require__(2);
-var app_1 = __webpack_require__(1);
+var ReactDOM = __webpack_require__(4);
+var app_1 = __webpack_require__(3);
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("app"));
 
 
